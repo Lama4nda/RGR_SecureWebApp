@@ -1,0 +1,14 @@
+--- Maven (папка збірки) ---
+target/ *.war *.jar *.ear *.zip *.tar.gz *.rar
+
+--- Eclipse (налаштування IDE) ---
+.classpath .project .settings/ .factorypath bin/
+
+--- IntelliJ IDEA (якщо хтось відкриє в іншій IDE) ---
+.idea/ *.iml *.iws *.ipr out/
+
+--- OS System Files ---
+.DS_Store Thumbs.db
+
+--- Logs ---
+*.log

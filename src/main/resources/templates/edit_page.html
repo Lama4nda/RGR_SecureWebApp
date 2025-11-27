@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Редагування запису</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; display: flex; justify-content: center; padding-top: 50px; }
+        .form-container { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 400px; }
+        h2 { text-align: center; color: #333; margin-bottom: 20px; }
+        label { display: block; margin-bottom: 5px; color: #666; }
+        input, select { width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        button { width: 100%; padding: 10px; background-color: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; }
+        button:hover { background-color: #218838; }
+        .cancel-btn { display: block; text-align: center; margin-top: 15px; text-decoration: none; color: #dc3545; }
+    </style>
+</head>
+<body>
+
+<div class="form-container">
+
+    <!-- === БЛОК 1: РЕДАГУВАННЯ КРАЇНИ === -->
+    <!-- Цей блок покажеться ТІЛЬКИ якщо editType == 'country' -->
+    <div th:if="${editType == 'country'}">
+        <h2>Редагувати Країну</h2>
+        <form th:action="@{/updateCountry}" method="post">
+            <input type="hidden" name="id" th:value="${country.id}">
+            
+            <label>Назва країни:</label>
+            <input type="text" name="name" th:value="${country.name}" required>
+            
+            <button type="submit">Зберегти зміни</button>
+        </form>
+    </div>
+
+    <!-- === БЛОК 2: РЕДАГУВАННЯ КУРОРТУ === -->
+    <!-- Цей блок покажеться ТІЛЬКИ якщо editType == 'resort' -->
+    <div th:if="${editType == 'resort'}">
+        <h2>Редагувати Курорт</h2>
+        <form th:action="@{/updateResort}" method="post">
+            <input type="hidden" name="id" th:value="${resort.id}">
+            
+            <label>Назва курорту:</label>
+            <input type="text" name="name" th:value="${resort.name}" required>
+            
+            <label>Країна:</label>
+            <select name="countryId" required>
+                <option th:each="c : ${allCountries}" 
+                        th:value="${c.id}" 
+                        th:text="${c.name}"
+                        th:selected="${c.id == resort.country.id}">Країна</option>
+            </select>
+            
+            <button type="submit">Зберегти зміни</button>
+        </form>
+    </div>
+
+    <!-- === БЛОК 3: РЕДАГУВАННЯ ГОТЕЛЮ === -->
+    <!-- Цей блок покажеться ТІЛЬКИ якщо editType == 'hotel' -->
+    <div th:if="${editType == 'hotel'}">
+        <h2>Редагувати Готель</h2>
+        <form th:action="@{/updateHotel}" method="post">
+            <input type="hidden" name="id" th:value="${hotel.id}">
+            
+            <label>Назва готелю:</label>
+            <input type="text" name="name" th:value="${hotel.name}" required>
+            
+            <label>Кількість зірок:</label>
+            <input type="number" name="stars" th:value="${hotel.stars}" min="1" max="5" required>
+            
+            <label>Курорт:</label>
+            <select name="resortId" required>
+                <option th:each="r : ${allResorts}" 
+                        th:value="${r.id}" 
+                        th:text="${r.name}"
+                        th:selected="${r.id == hotel.resort.id}">Курорт</option>
+            </select>
+            
+            <button type="submit">Зберегти зміни</button>
+        </form>
+    </div>
+
+    <a href="/dashboard" class="cancel-btn">Скасувати</a>
+</div>
+
+</body>
+</html>

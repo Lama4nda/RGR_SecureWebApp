@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<!-- Підключаємо Thymeleaf (шаблонізатор Spring) -->
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>Безпечний Веб-додаток</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 20px; background-color: #f4f7f6; }
+        h1 { text-align: center; color: #333; }
+        .container { display: flex; justify-content: space-between; gap: 20px; }
+        .column { flex: 1; background: #fff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); padding: 20px; }
+        h2 { color: #0056b3; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        form { display: grid; gap: 10px; margin-bottom: 20px; }
+        input[type="text"], input[type="number"], select {
+            width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px;
+        }
+        button {
+            background-color: #007bff; color: white; padding: 10px; border: none; border-radius: 4px; cursor: pointer;
+        }
+        button:hover { background-color: #0056b3; }
+        ul { list-style-type: none; padding: 0; }
+        li {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 8px 0; border-bottom: 1px solid #f0f0f0;
+        }
+        li a { color: #dc3545; text-decoration: none; font-size: 0.9em; }
+        li a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <a href="/logout" class="logout-link">Вийти</a>
+    
+    <h1>Менеджер Відпочинку</h1>
+    <p style="text-align: center; color: #555;">
+        Цей додаток використовує Spring Boot та Spring Data JPA.
+        <br>
+        <p style="text-align: center; color: #555;">
+        Ви увійшли як: <span sec:authentication="name"></span>
+    </p>
+    </p>
+
+    <div class="container">
+
+        <!-- === КОЛОНКА 1: КРАЇНИ === -->
+        <div class="column">
+            <h2>Країни</h2>
+            <form th:action="@{/addCountry}" method="post">
+                <input type="text" name="countryName" placeholder="Назва нової країни" required>
+                <button type="submit">Додати Країну</button>
+            </form>
+            <ul>
+                <!-- Thymeleaf цикл: для кожної країни зі списку 'countries' -->
+                <li th:each="country : ${countries}">
+                    <!-- Виводимо назву країни -->
+                    <span th:text="${country.name}">Назва країни</span>
+                    <div>
+                    <!-- Кнопка Редагувати -->
+                    <a sec:authorize="hasAuthority('ADMIN')" 
+                       th:href="@{/editCountry/{id}(id=${country.id})}" 
+                       style="color: orange; margin-right: 10px;">Редагувати</a>
+                       
+                    <!-- Посилання для видалення -->
+                    <a sec:authorize="hasAuthority('ADMIN')"
+                       th:href="@{/deleteCountry/{id}(id=${country.id})}">Видалити</a>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <!-- === КОЛОНКА 2: КУРОРТИ === -->
+        <div class="column">
+            <h2>Курорти</h2>
+            <form th:action="@{/addResort}" method="post">
+                <input type="text" name="resortName" placeholder="Назва нового курорту" required>
+                <select name="countryId" required>
+                    <option value="" disabled selected>Оберіть країну</option>
+                    <!-- Динамічний список країн -->
+                    <option th:each="country : ${countries}"
+                            th:value="${country.id}"
+                            th:text="${country.name}">Країна</option>
+                </select>
+                <button type="submit">Додати Курорт</button>
+            </form>
+            <ul>
+                <li th:each="resort : ${resorts}">
+                    <!-- Виводимо назву курорту та назву країни -->
+                    <span th:text="${resort.name} + ' (' + ${resort.country.name} + ')'">Назва курорту (Країна)</span>
+                    <div>
+                       <a sec:authorize="hasAuthority('ADMIN')" 
+                          th:href="@{/editResort/{id}(id=${resort.id})}" 
+                          style="color: orange; margin-right: 10px;">Редагувати</a>
+           
+                       <a sec:authorize="hasAuthority('ADMIN')"
+                          th:href="@{/deleteResort/{id}(id=${resort.id})}">Видалити</a>
+                   </div>
+                </li>
+            </ul>
+        </div>
+
+        <!-- === КОЛОНКА 3: ГОТЕЛІ === -->
+        <div class="column">
+            <h2>Готелі</h2>
+            <form th:action="@{/addHotel}" method="post">
+                <input type="text" name="hotelName" placeholder="Назва нового готелю" required>
+                <input type="number" name="stars" placeholder="Кількість зірок" min="1" max="5" required>
+                <select name="resortId" required>
+                    <option value="" disabled selected>Оберіть курорт</option>
+                    <!-- Динамічний список курортів -->
+                    <option th:each="resort : ${resorts}"
+                            th:value="${resort.id}"
+                            th:text="${resort.name} + ' (' + ${resort.country.name} + ')'">Курорт</option>
+                </select>
+                <button type="submit">Додати Готель</button>
+            </form>
+            <ul>
+                <li th:each="hotel : ${hotels}">
+                    <span th:text="${hotel.name} + ' (' + ${hotel.stars} + '*, ' + ${hotel.resort.name} + ')'">Назва готелю (Зірки, Курорт)</span>
+                    <div>
+                       <a sec:authorize="hasAuthority('ADMIN')" 
+                          th:href="@{/editHotel/{id}(id=${hotel.id})}" 
+                          style="color: orange; margin-right: 10px;">Редагувати</a>
+           
+                       <a sec:authorize="hasAuthority('ADMIN')"
+                          th:href="@{/deleteHotel/{id}(id=${hotel.id})}">Видалити</a>
+                   </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+</body>
+</html>
