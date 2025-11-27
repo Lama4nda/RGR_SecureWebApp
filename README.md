@@ -29,4 +29,4 @@ mvn spring-boot:run -Dspring-boot.run.arguments=--DB_PASSWORD=postgres
 Пароль: user
 Права: Може переглядати дані (Read-only).
 
-Розроблено студентом Брегида Катерина КІ-231
+Розроблено студенткою Брегида Катерина КІ-231
