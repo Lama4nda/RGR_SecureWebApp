@@ -4,18 +4,8 @@ SecureWebApp - Менеджер Відпочинку
 Проект реалізований на Java з використанням Spring Boot та розмежування прав доступу. Проект має простий веб інтерфейс і можливість авторизації користувачів.
 
 Налаштування та Запуск
-1. База Даних (Docker)
-Запустіть контейнер з PostgreSQL (якщо він ще не запущений):
-docker run --name postgresql_db -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -p 5433:5432 -d postgres
-
-2. Змінні середовища
-Для запуску додатку необхідно задати змінну середовища для логіну та пароля БД:
-DB_USERNAME: Логін до бази даних (postgres).
-DB_PASSWORD: Пароль до бази даних (postgres).
-
-4. Запуск
-Запустіть клас com.example.secure.SecureWebAppApplication у IDE або через командний рядок:
-mvn spring-boot:run -Dspring-boot.run.arguments=--DB_PASSWORD=postgres
+1. docker-compose up -d --build на сервері (запуск бази і застосунку)
+2. docker-compose up -d db на сервері (запуск бази) + run в IDE (запуск застосунку)
 
 Доступ (Логін/Пароль)
 При першому запуску автоматично створюються наступні користувачі:
