@@ -1,0 +1,32 @@
+services:
+  # 1. Сервіс Бази Даних (PostgreSQL)
+  db:
+    image: postgres:17
+    container_name: secure_postgres
+    restart: always
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD} # Беремо пароль з .env файлу або системної змінної
+    ports:
+      - "5433:5432" # Зовнішній порт 5433, внутрішній 5432
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  # 2. Сервіс Додатку (Spring Boot)
+  app:
+    build: . # Будувати образ з поточної директорії (де лежить Dockerfile)
+    container_name: secure_webapp
+    restart: on-failure
+    ports:
+      - "8080:8080" # Відкриваємо порт 8080 для доступу з браузера
+    depends_on:
+      - db # Запускати тільки після того, як стартує база
+    environment:
+      # Перевизначаємо налаштування для Docker-середовища
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/postgres?sessionTimezone=Europe/Kyiv
+      SPRING_DATASOURCE_USERNAME: ${DB_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+
+volumes:
+  pgdata:
