@@ -77,9 +77,10 @@ public class SecureApp {
                 log.info("[INIT] Курорти додано.");
 
                 // --- Створюємо Готелі ---
-                Hotel radisson = new Hotel("Radisson Blu", 5, bukovel);
-                Hotel rixos = new Hotel("Rixos Premium", 5, antalya);
-                Hotel savoy = new Hotel("Savoy", 5, sharm);
+                // new Hotel(Назва, Зірки, КІМНАТИ, Курорт)
+                Hotel radisson = new Hotel("Radisson Blu", 5, 50, bukovel); 
+                Hotel rixos = new Hotel("Rixos Premium", 5, 100, antalya);
+                Hotel savoy = new Hotel("Savoy", 5, 70, sharm);
 
                 hotelRepo.save(radisson);
                 hotelRepo.save(rixos);

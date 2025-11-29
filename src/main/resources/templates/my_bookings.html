@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Мої бронювання</title>
+    <style>
+        body { font-family: sans-serif; background-color: #f4f7f6; padding: 20px; }
+        .container { max-width: 900px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h1 { text-align: center; color: #333; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 12px; border-bottom: 1px solid #ddd; text-align: left; }
+        th { background-color: #f8f9fa; }
+        .btn-cancel { background-color: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; text-decoration: none; }
+        .btn-cancel:hover { background-color: #c82333; }
+        .back-link { display: block; margin-top: 20px; text-align: center; text-decoration: none; color: #007bff; }
+        .alert { padding: 10px; margin-bottom: 15px; border-radius: 4px; text-align: center; }
+        .alert-success { background-color: #d4edda; color: #155724; }
+        .alert-danger { background-color: #f8d7da; color: #721c24; }
+        
+        /* Стиль для тексту активностей */
+        .activities-text { color: #0056b3; font-style: italic; font-size: 0.9em; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Мої бронювання</h1>
+
+    <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+    <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
+
+    <p th:if="${bookings.empty}" style="text-align: center; color: gray;">
+        У вас поки немає активних бронювань.
+    </p>
+
+    <table th:unless="${bookings.empty}">
+        <thead>
+        <tr>
+            <th>Готель</th>
+            <th>Курорт</th>
+            <th>Заїзд</th>
+            <th>Виїзд</th>
+            <th>Мої плани (Активності)</th>
+            <th>Дія</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="booking : ${bookings}">
+            <td th:text="${booking.hotel.name}">Готель</td>
+            <td th:text="${booking.hotel.resort.name}">Курорт</td>
+            <td th:text="${booking.checkInDate}">2025-01-01</td>
+            <td th:text="${booking.checkOutDate}">2025-01-07</td>
+            
+            <td>
+                <span class="activities-text" 
+                      th:text="${booking.userActivities}">
+                      Лижі, Санаторій
+                </span>
+            </td>
+
+            <td>
+                <form th:action="@{/booking/cancel/{id}(id=${booking.id})}" method="post" 
+                      onsubmit="return confirm('Ви впевнені, що хочете скасувати це бронювання?');">
+                    <button type="submit" class="btn-cancel">Скасувати</button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <a href="/dashboard" class="back-link">← Повернутися на головну</a>
+</div>
+
+</body>
+</html>

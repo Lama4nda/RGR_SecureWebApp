@@ -8,18 +8,39 @@
         .form-container { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 400px; }
         h2 { text-align: center; color: #333; margin-bottom: 20px; }
         label { display: block; margin-bottom: 5px; color: #666; }
-        input, select { width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        /* input[type="text"] та number розтягуємо, а checkbox ні */
+        input[type="text"], input[type="number"], select { width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        
         button { width: 100%; padding: 10px; background-color: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; }
         button:hover { background-color: #218838; }
         .cancel-btn { display: block; text-align: center; margin-top: 15px; text-decoration: none; color: #dc3545; }
+
+        /* Стиль для чекбоксів */
+        .checkbox-group {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            border: 1px solid #e9ecef;
+        }
+        .checkbox-label {
+            display: flex !important; /* Перебиваємо блочний стиль */
+            align-items: center;
+            margin-bottom: 8px;
+            cursor: pointer;
+            color: #333;
+        }
+        .checkbox-label input {
+            width: auto !important; /* Скасовуємо 100% ширину */
+            margin-bottom: 0;
+            margin-right: 10px;
+        }
     </style>
 </head>
 <body>
 
 <div class="form-container">
 
-    <!-- === БЛОК 1: РЕДАГУВАННЯ КРАЇНИ === -->
-    <!-- Цей блок покажеться ТІЛЬКИ якщо editType == 'country' -->
     <div th:if="${editType == 'country'}">
         <h2>Редагувати Країну</h2>
         <form th:action="@{/updateCountry}" method="post">
@@ -28,12 +49,17 @@
             <label>Назва країни:</label>
             <input type="text" name="name" th:value="${country.name}" required>
             
+            <div class="checkbox-group">
+                <label class="checkbox-label">
+                    <input type="checkbox" name="isOpen" th:checked="${country.isOpen}">
+                    <b>Кордони відкрито</b> (Дозволити в'їзд)
+                </label>
+            </div>
+            
             <button type="submit">Зберегти зміни</button>
         </form>
     </div>
 
-    <!-- === БЛОК 2: РЕДАГУВАННЯ КУРОРТУ === -->
-    <!-- Цей блок покажеться ТІЛЬКИ якщо editType == 'resort' -->
     <div th:if="${editType == 'resort'}">
         <h2>Редагувати Курорт</h2>
         <form th:action="@{/updateResort}" method="post">
@@ -49,13 +75,42 @@
                         th:text="${c.name}"
                         th:selected="${c.id == resort.country.id}">Країна</option>
             </select>
+
+            <div class="checkbox-group">
+                <label class="checkbox-label">
+                    <input type="checkbox" name="isOpen" th:checked="${resort.isOpen}">
+                    <b>Курорт працює</b> (Приймати гостей)
+                </label>
+            </div>
+
+            <div class="checkbox-group">
+                <h4 style="margin-top: 0; margin-bottom: 10px; color: #555;">Що є на курорті?</h4>
+                
+                <label class="checkbox-label">
+                    <input type="checkbox" name="hasSki" th:checked="${resort.hasSki}"> ⛷️ Лижі / Сноуборд
+                </label>
+                
+                <label class="checkbox-label">
+                    <input type="checkbox" name="hasBeach" th:checked="${resort.hasBeach}"> 🏖️ Море / Пляж
+                </label>
+                
+                <label class="checkbox-label">
+                    <input type="checkbox" name="hasExcursions" th:checked="${resort.hasExcursions}"> 🏛️ Екскурсії
+                </label>
+                
+                <label class="checkbox-label">
+                    <input type="checkbox" name="hasSanatorium" th:checked="${resort.hasSanatorium}"> 🧖‍♀️ Санаторій
+                </label>
+                
+                <label class="checkbox-label">
+                    <input type="checkbox" name="hasEntertainment" th:checked="${resort.hasEntertainment}"> 🎉 Розваги
+                </label>
+            </div>
             
             <button type="submit">Зберегти зміни</button>
         </form>
     </div>
 
-    <!-- === БЛОК 3: РЕДАГУВАННЯ ГОТЕЛЮ === -->
-    <!-- Цей блок покажеться ТІЛЬКИ якщо editType == 'hotel' -->
     <div th:if="${editType == 'hotel'}">
         <h2>Редагувати Готель</h2>
         <form th:action="@{/updateHotel}" method="post">
@@ -66,6 +121,9 @@
             
             <label>Кількість зірок:</label>
             <input type="number" name="stars" th:value="${hotel.stars}" min="1" max="5" required>
+
+            <label>Всього кімнат:</label>
+            <input type="number" name="totalRooms" th:value="${hotel.totalRooms}" min="1" required>
             
             <label>Курорт:</label>
             <select name="resortId" required>

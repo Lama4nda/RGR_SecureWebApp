@@ -1,9 +1,13 @@
 package com.example.secure.model;
 
 import javax.persistence.*;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "hotels")
+@Data 
+@NoArgsConstructor
 public class Hotel {
 
     @Id
@@ -14,46 +18,17 @@ public class Hotel {
     private String name;
 
     private int stars;
+    private int totalRooms;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "resort_id", nullable = false) // Ключ до таблиці курортів
     private Resort resort;
 
-    // Конструктор за замовчуванням (необхідний для JPA)
-    public Hotel() {
-    }
-
     // Наш конструктор
-    public Hotel(String name, int stars, Resort resort) {
+    public Hotel(String name, int stars, int totalRooms, Resort resort) {
         this.name = name;
         this.stars = stars;
+        this.totalRooms = totalRooms;
         this.resort = resort;
-    }
-
-    // --- Getters and Setters ---
-    
-    public Long getId() { 
-        return id; 
-    }
-    public void setId(Long id) { 
-        this.id = id; 
-    }
-    public String getName() { 
-        return name; 
-    }
-    public void setName(String name) { 
-        this.name = name; 
-    }
-    public int getStars() { 
-        return stars; 
-    }
-    public void setStars(int stars) { 
-        this.stars = stars; 
-    }
-    public Resort getResort() { 
-        return resort; 
-    }
-    public void setResort(Resort resort) { 
-        this.resort = resort; 
     }
 }

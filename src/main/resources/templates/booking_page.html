@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Бронювання готелю</title>
+    <style>
+        body { font-family: sans-serif; background-color: #f4f7f6; display: flex; justify-content: center; padding-top: 50px; }
+        .card { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 400px; }
+        h2 { text-align: center; color: #333; }
+        .info { margin-bottom: 20px; color: #555; text-align: center; }
+        .alert-danger { color: #721c24; background-color: #f8d7da; border: 1px solid #f5c6cb; padding: 10px; border-radius: 4px; margin-bottom: 15px; text-align: center; }
+        label { display: block; margin-top: 10px; font-weight: bold; color: #333; }
+        
+        /* Загальний стиль для текстових полів */
+        input[type="date"], input[type="text"] { 
+            width: 100%; padding: 8px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; 
+        }
+        
+        .btn-submit { width: 100%; padding: 10px; background-color: #28a745; color: white; border: none; border-radius: 4px; margin-top: 20px; cursor: pointer; }
+        .btn-submit:hover { background-color: #218838; }
+        .btn-cancel { display: block; text-align: center; margin-top: 10px; color: #666; text-decoration: none; }
+
+        /* Стиль для блоку активностей */
+        .activities-box {
+            background-color: #f9f9f9;
+            border: 1px solid #eee;
+            border-radius: 5px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+        .checkbox-label {
+            display: flex; 
+            align-items: center; 
+            font-weight: normal; 
+            margin-top: 5px; 
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h2>Бронювання</h2>
+        
+        <div class="info">
+            <h3 th:text="${hotel.name}">Назва готелю</h3>
+            <span style="color: gold;" th:text="${#strings.repeat('★', hotel.stars)}"></span>
+            <br>
+            <span th:text="${hotel.resort.name} + ', ' + ${hotel.resort.country.name}"></span>
+        </div>
+
+        <div th:if="${errorMessage}" class="alert-danger">
+            <span th:text="${errorMessage}"></span>
+        </div>
+
+        <form action="/book/submit" method="post">
+            <input type="hidden" name="hotelId" th:value="${hotel.id}">
+
+            <label for="checkIn">Дата заїзду:</label>
+            <input type="date" id="checkIn" name="checkIn" required>
+
+            <label for="checkOut">Дата виїзду:</label>
+            <input type="date" id="checkOut" name="checkOut" required>
+
+            <div class="activities-box">
+                <h4 style="margin-top: 0; text-align: center; color: #555;">Чим плануєте зайнятися?</h4>
+                <p style="text-align: center; font-size: 0.8em; color: gray; margin-bottom: 10px;">
+                    Оберіть опції, доступні на курорті <span th:text="${hotel.resort.name}"></span>:
+                </p>
+
+                <div th:if="${hotel.resort.hasSki}">
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="activities" value="Лижі/Сноуборд" style="width: auto; margin-right: 10px;"> 
+                        ⛷️ Лижі та Сноуборд
+                    </label>
+                </div>
+
+                <div th:if="${hotel.resort.hasBeach}">
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="activities" value="Пляжний відпочинок" style="width: auto; margin-right: 10px;"> 
+                        🏖️ Море і Пляж
+                    </label>
+                </div>
+
+                <div th:if="${hotel.resort.hasExcursions}">
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="activities" value="Екскурсії" style="width: auto; margin-right: 10px;"> 
+                        🏛️ Екскурсії
+                    </label>
+                </div>
+
+                <div th:if="${hotel.resort.hasSanatorium}">
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="activities" value="Санаторій/Лікування" style="width: auto; margin-right: 10px;"> 
+                        🧖‍♀️ Санаторій
+                    </label>
+                </div>
+
+                <div th:if="${hotel.resort.hasEntertainment}">
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="activities" value="Розважальна програма" style="width: auto; margin-right: 10px;"> 
+                        🎉 Розваги
+                    </label>
+                </div>
+                
+                <p th:if="${!hotel.resort.hasSki and !hotel.resort.hasBeach and !hotel.resort.hasExcursions and !hotel.resort.hasSanatorium and !hotel.resort.hasEntertainment}" 
+                   style="text-align: center; color: gray; font-style: italic;">
+                    На цьому курорті додаткові активності не зазначені.
+                </p>
+            </div>
+            <button type="submit" class="btn-submit">Підтвердити бронювання</button>
+        </form>
+
+        <a href="/dashboard" class="btn-cancel">Скасувати</a>
+    </div>
+
+</body>
+</html>

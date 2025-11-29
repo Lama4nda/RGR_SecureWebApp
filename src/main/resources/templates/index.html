@@ -1,16 +1,16 @@
 <!DOCTYPE html>
-<!-- Підключаємо Thymeleaf (шаблонізатор Spring) -->
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
-    <title>Безпечний Веб-додаток</title>
+    <title>Менеджер Відпочинку</title>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 20px; background-color: #f4f7f6; }
         h1 { text-align: center; color: #333; }
         .container { display: flex; justify-content: space-between; gap: 20px; }
         .column { flex: 1; background: #fff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); padding: 20px; }
         h2 { color: #0056b3; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        
         form { display: grid; gap: 10px; margin-bottom: 20px; }
         input[type="text"], input[type="number"], select {
             width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px;
@@ -19,110 +19,185 @@
             background-color: #007bff; color: white; padding: 10px; border: none; border-radius: 4px; cursor: pointer;
         }
         button:hover { background-color: #0056b3; }
+        
         ul { list-style-type: none; padding: 0; }
         li {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 8px 0; border-bottom: 1px solid #f0f0f0;
+            display: flex; flex-direction: column; 
+            padding: 10px 0; border-bottom: 1px solid #f0f0f0;
         }
-        li a { color: #dc3545; text-decoration: none; font-size: 0.9em; }
-        li a:hover { text-decoration: underline; }
+        .hotel-info { font-weight: bold; margin-bottom: 5px; }
+        .actions { display: flex; gap: 10px; align-items: center; margin-top: 5px; flex-wrap: wrap;}
+        
+        .admin-link { color: #dc3545; text-decoration: none; font-size: 0.9em; }
+        .edit-link { color: orange; }
+        
+        .book-btn {
+            background-color: #28a745; color: white; text-decoration: none;
+            padding: 5px 10px; border-radius: 4px; font-size: 0.9em;
+        }
+        .book-btn:hover { background-color: #218838; }
+        
+        .no-places {
+            color: gray; font-size: 0.9em; border: 1px solid gray; padding: 5px; border-radius: 4px; cursor: not-allowed;
+        }
+
+        .closed-status {
+            color: red; font-weight: bold; font-size: 0.9em; border: 1px solid red; padding: 5px; border-radius: 4px;
+        }
+
+        .alert { padding: 10px; margin-bottom: 20px; border-radius: 5px; text-align: center; }
+        .alert-success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .alert-danger { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        
+        /* Стиль для іконок активностей */
+        .activity-icons span { cursor: help; margin-right: 2px; }
     </style>
 </head>
 <body>
-    <a href="/logout" class="logout-link">Вийти</a>
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+    <div>
+        <span>Ви увійшли як: <b sec:authentication="name">User</b></span>
+        <a href="/my-bookings" style="margin-left: 15px; font-weight: bold; color: #007bff;">Мої бронювання</a>
+    </div>
+    <a href="/logout" style="color: red;">Вийти</a>
+    </div>
     
     <h1>Менеджер Відпочинку</h1>
-    <p style="text-align: center; color: #555;">
-        Цей додаток використовує Spring Boot та Spring Data JPA.
-        <br>
-        <p style="text-align: center; color: #555;">
-        Ви увійшли як: <span sec:authentication="name"></span>
-    </p>
-    </p>
+
+    <div th:if="${successMessage}" class="alert alert-success">
+        <span th:text="${successMessage}"></span>
+    </div>
+    <div th:if="${errorMessage}" class="alert alert-danger">
+        <span th:text="${errorMessage}"></span>
+    </div>
 
     <div class="container">
 
-        <!-- === КОЛОНКА 1: КРАЇНИ === -->
         <div class="column">
             <h2>Країни</h2>
             <form th:action="@{/addCountry}" method="post">
                 <input type="text" name="countryName" placeholder="Назва нової країни" required>
                 <button type="submit">Додати Країну</button>
             </form>
+            
             <ul>
-                <!-- Thymeleaf цикл: для кожної країни зі списку 'countries' -->
                 <li th:each="country : ${countries}">
-                    <!-- Виводимо назву країни -->
-                    <span th:text="${country.name}">Назва країни</span>
                     <div>
-                    <!-- Кнопка Редагувати -->
-                    <a sec:authorize="hasAuthority('ADMIN')" 
-                       th:href="@{/editCountry/{id}(id=${country.id})}" 
-                       style="color: orange; margin-right: 10px;">Редагувати</a>
-                       
-                    <!-- Посилання для видалення -->
-                    <a sec:authorize="hasAuthority('ADMIN')"
-                       th:href="@{/deleteCountry/{id}(id=${country.id})}">Видалити</a>
+                        <span th:text="${country.name}">Назва країни</span>
+                        <span th:unless="${country.isOpen}" style="color: red; font-weight: bold; font-size: 0.8em;">(ЗАЧИНЕНО)</span>
+                    </div>
+                    
+                    <div class="actions" sec:authorize="hasAuthority('ADMIN')">
+                        <a class="admin-link edit-link" th:href="@{/editCountry/{id}(id=${country.id})}">Редагувати</a>
+                        <a class="admin-link" th:href="@{/deleteCountry/{id}(id=${country.id})}">Видалити</a>
                     </div>
                 </li>
             </ul>
         </div>
 
-        <!-- === КОЛОНКА 2: КУРОРТИ === -->
         <div class="column">
             <h2>Курорти</h2>
             <form th:action="@{/addResort}" method="post">
                 <input type="text" name="resortName" placeholder="Назва нового курорту" required>
                 <select name="countryId" required>
                     <option value="" disabled selected>Оберіть країну</option>
-                    <!-- Динамічний список країн -->
                     <option th:each="country : ${countries}"
                             th:value="${country.id}"
                             th:text="${country.name}">Країна</option>
                 </select>
                 <button type="submit">Додати Курорт</button>
             </form>
+            
             <ul>
                 <li th:each="resort : ${resorts}">
-                    <!-- Виводимо назву курорту та назву країни -->
-                    <span th:text="${resort.name} + ' (' + ${resort.country.name} + ')'">Назва курорту (Країна)</span>
                     <div>
-                       <a sec:authorize="hasAuthority('ADMIN')" 
-                          th:href="@{/editResort/{id}(id=${resort.id})}" 
-                          style="color: orange; margin-right: 10px;">Редагувати</a>
-           
-                       <a sec:authorize="hasAuthority('ADMIN')"
-                          th:href="@{/deleteResort/{id}(id=${resort.id})}">Видалити</a>
+                        <span th:text="${resort.name} + ' (' + ${resort.country.name} + ')'"></span>
+                        
+                        <span class="activity-icons" style="margin-left: 5px;">
+                            <span th:if="${resort.hasSki}" title="Лижі/Сноуборд">⛷️</span>
+                            <span th:if="${resort.hasBeach}" title="Море/Пляж">🏖️</span>
+                            <span th:if="${resort.hasExcursions}" title="Екскурсії">🏛️</span>
+                            <span th:if="${resort.hasSanatorium}" title="Санаторій">🧖‍♀️</span>
+                            <span th:if="${resort.hasEntertainment}" title="Розваги">🎉</span>
+                        </span>
+                        
+                        <span th:if="${!resort.country.isOpen}" style="color: red; font-size: 0.8em; font-weight: bold;">(Країна закрита)</span>
+                        <span th:if="${resort.country.isOpen and !resort.isOpen}" style="color: red; font-size: 0.8em; font-weight: bold;">(Курорт зачинено)</span>
+                    </div>
+
+                    <div class="actions" sec:authorize="hasAuthority('ADMIN')">
+                        <a class="admin-link edit-link" th:href="@{/editResort/{id}(id=${resort.id})}">Редагувати</a>
+                        <a class="admin-link" th:href="@{/deleteResort/{id}(id=${resort.id})}">Видалити</a>
                    </div>
                 </li>
             </ul>
         </div>
 
-        <!-- === КОЛОНКА 3: ГОТЕЛІ === -->
         <div class="column">
             <h2>Готелі</h2>
+            
             <form th:action="@{/addHotel}" method="post">
-                <input type="text" name="hotelName" placeholder="Назва нового готелю" required>
-                <input type="number" name="stars" placeholder="Кількість зірок" min="1" max="5" required>
+                <input type="text" name="hotelName" placeholder="Назва готелю" required>
+                <input type="number" name="stars" placeholder="Зірки (1-5)" min="1" max="5" required>
+                <input type="number" name="totalRooms" placeholder="Всього кімнат" min="1" required>
+                
                 <select name="resortId" required>
                     <option value="" disabled selected>Оберіть курорт</option>
-                    <!-- Динамічний список курортів -->
                     <option th:each="resort : ${resorts}"
                             th:value="${resort.id}"
                             th:text="${resort.name} + ' (' + ${resort.country.name} + ')'">Курорт</option>
                 </select>
                 <button type="submit">Додати Готель</button>
             </form>
+            
             <ul>
                 <li th:each="hotel : ${hotels}">
-                    <span th:text="${hotel.name} + ' (' + ${hotel.stars} + '*, ' + ${hotel.resort.name} + ')'">Назва готелю (Зірки, Курорт)</span>
-                    <div>
-                       <a sec:authorize="hasAuthority('ADMIN')" 
-                          th:href="@{/editHotel/{id}(id=${hotel.id})}" 
-                          style="color: orange; margin-right: 10px;">Редагувати</a>
+                    <div class="hotel-info">
+                        <span th:text="${hotel.name}">Готель</span>
+                        <span style="color: gold;" th:text="${#strings.repeat('★', hotel.stars)}"></span>
+                        <br>
+                        
+                        <small>
+                           <span th:text="${hotel.resort.name}"></span>
+                           
+                           <span class="activity-icons">
+                                <span th:if="${hotel.resort.hasSki}" title="Лижі">⛷️</span>
+                                <span th:if="${hotel.resort.hasBeach}" title="Море">🏖️</span>
+                                <span th:if="${hotel.resort.hasExcursions}" title="Екскурсії">🏛️</span>
+                                <span th:if="${hotel.resort.hasSanatorium}" title="Санаторій">🧖‍♀️</span>
+                                <span th:if="${hotel.resort.hasEntertainment}" title="Розваги">🎉</span>
+                           </span> 
+                           | 
+                           
+                           Вільних місць: 
+                           <b th:style="${freeRoomsMap.get(hotel.id) > 0} ? 'color: green' : 'color: red'"
+                              th:text="${freeRoomsMap.get(hotel.id)} + ' / ' + ${hotel.totalRooms}">
+                           </b>
+                        </small>
+                    </div>
+
+                    <div class="actions">
+                        <span th:if="${!hotel.resort.isOpen or !hotel.resort.country.isOpen}" 
+                              class="closed-status">
+                              НАПРЯМОК ЗАКРИТО
+                        </span>
+
+                        <span th:if="${hotel.resort.isOpen and hotel.resort.country.isOpen and freeRoomsMap.get(hotel.id) <= 0}" 
+                              class="no-places">
+                              Немає місць
+                        </span>
+
+                        <a th:if="${hotel.resort.isOpen and hotel.resort.country.isOpen and freeRoomsMap.get(hotel.id) > 0}" 
+                           th:href="@{/book/{id}(id=${hotel.id})}" 
+                           class="book-btn">Забронювати</a>
+
+                        <a sec:authorize="hasAuthority('ADMIN')" 
+                           class="admin-link edit-link" 
+                           th:href="@{/editHotel/{id}(id=${hotel.id})}">Редагувати</a>
            
-                       <a sec:authorize="hasAuthority('ADMIN')"
-                          th:href="@{/deleteHotel/{id}(id=${hotel.id})}">Видалити</a>
+                        <a sec:authorize="hasAuthority('ADMIN')"
+                           class="admin-link"
+                           th:href="@{/deleteHotel/{id}(id=${hotel.id})}">Видалити</a>
                    </div>
                 </li>
             </ul>
