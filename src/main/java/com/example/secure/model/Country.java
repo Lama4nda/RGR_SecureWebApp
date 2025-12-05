@@ -20,6 +20,11 @@ public class Country {
     
     @Column(nullable = false)
     private boolean isOpen = true;
+    
+   // --- ТИП МІСЦЕВОСТІ ---
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private LocationType locationType; // MOUNTAINS, SEASIDE, NEUTRAL
 
     // Вказує на зв'язок "Один-до-Багатьох"
     // 'mappedBy = "country"' означає, що поле 'country' в класі 'Resort' керує цим зв'язком
@@ -28,8 +33,9 @@ public class Country {
     private Set<Resort> resorts;
 
     // Наш конструктор для зручності
-    public Country(String name) {
+    public Country(String name, LocationType locationType) {
         this.name = name;
+        this.locationType = locationType;
         this.isOpen = true;
     }
 }

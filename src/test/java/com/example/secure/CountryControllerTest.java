@@ -2,6 +2,7 @@ package com.example.secure;
 
 import com.example.secure.controller.CountryController;
 import com.example.secure.model.Country;
+import com.example.secure.model.LocationType;
 import com.example.secure.repo.CountryRepo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,19 +34,21 @@ class CountryControllerTest {
         MockitoAnnotations.openMocks(this);
     }
 
-    // --- ТЕСТ 1: Додавання країни ---
+    // --- ТЕСТ 1: Додавання країни (Create) ---
     @Test
     void testAddCountry() {
         String countryName = "Україна";
+        String locationTypeStr = "MOUNTAINS"; // Новий параметр: Тип місцевості
 
-        // addCountry зазвичай приймає тільки ім'я (isOpen = true за замовчуванням в конструкторі)
-        String viewName = countryController.addCountry(countryName);
+        // Викликаємо метод з двома параметрами (Назва, Тип)
+        String viewName = countryController.addCountry(countryName, locationTypeStr);
 
+        // Перевіряємо, що збереження відбулося
         verify(countryRepo, times(1)).save(any(Country.class));
         assertEquals("redirect:/dashboard", viewName);
     }
 
-    // --- ТЕСТ 2: Видалення країни ---
+    // --- ТЕСТ 2: Видалення країни (Delete) ---
     @Test
     void testDeleteCountry() {
         Long countryId = 1L;
@@ -60,7 +63,8 @@ class CountryControllerTest {
     @Test
     void testEditCountry_Success() {
         Long countryId = 1L;
-        Country mockCountry = new Country("Польща");
+        // Використовуємо новий конструктор з LocationType
+        Country mockCountry = new Country("Польща", LocationType.NEUTRAL);
         mockCountry.setId(countryId);
 
         when(countryRepo.findById(countryId)).thenReturn(Optional.of(mockCountry));
@@ -89,20 +93,23 @@ class CountryControllerTest {
     void testUpdateCountry() {
         Long countryId = 1L;
         String newName = "Нова Назва";
-        boolean newStatus = true; // <--- НОВИЙ ПАРАМЕТР (isOpen)
+        boolean newStatus = true; // isOpen
+        String newLocationStr = "SEASIDE"; // Новий тип місцевості
 
-        Country existingCountry = new Country("Стара Назва");
+        // Створюємо стару версію країни
+        Country existingCountry = new Country("Стара Назва", LocationType.MOUNTAINS);
         existingCountry.setId(countryId);
-        existingCountry.setOpen(false); // Спочатку закрито
+        existingCountry.setOpen(false);
 
         when(countryRepo.findById(countryId)).thenReturn(Optional.of(existingCountry));
 
-        // Викликаємо метод з ТРЬОМА аргументами (ID, Name, isOpen)
-        String viewName = countryController.updateCountry(countryId, newName, newStatus);
+        // Викликаємо метод updateCountry з 4 параметрами: ID, Назва, Статус, Тип
+        String viewName = countryController.updateCountry(countryId, newName, newStatus, newLocationStr);
 
-        // Перевіряємо, що дані змінилися
+        // Перевіряємо, що всі поля оновилися
         assertEquals(newName, existingCountry.getName());
-        assertEquals(newStatus, existingCountry.isOpen()); // Перевіряємо, що статус оновився
+        assertEquals(newStatus, existingCountry.isOpen());
+        assertEquals(LocationType.SEASIDE, existingCountry.getLocationType()); // Перевірка зміни типу
 
         verify(countryRepo).save(existingCountry);
         assertEquals("redirect:/dashboard", viewName);

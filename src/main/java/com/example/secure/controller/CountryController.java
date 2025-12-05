@@ -1,6 +1,7 @@
 package com.example.secure.controller;
 
 import com.example.secure.model.Country;
+import com.example.secure.model.LocationType;
 import com.example.secure.repo.CountryRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -16,10 +17,17 @@ public class CountryController {
     @Autowired
     private CountryRepo countryRepo;
 
-    // --- CREATE ---
+ // --- CREATE ---
     @PostMapping("/addCountry")
-    public String addCountry(@RequestParam String countryName) {
-        countryRepo.save(new Country(countryName));
+    public String addCountry(@RequestParam String countryName,
+                             @RequestParam String locationTypeStr) { // Отримуємо тип як рядок
+        
+        // Перетворюємо рядок у Enum (MOUNTAINS, SEASIDE, NEUTRAL)
+        LocationType type = LocationType.valueOf(locationTypeStr);
+        
+        // Використовуємо оновлений конструктор Country
+        countryRepo.save(new Country(countryName, type));
+        
         return "redirect:/dashboard";
     }
 
@@ -30,7 +38,7 @@ public class CountryController {
         return "redirect:/dashboard";
     }
 
-    // --- EDIT (Відкрити форму) ---
+    // --- EDIT ---
     @GetMapping("/editCountry/{id}")
     public String editCountry(@PathVariable Long id, Model model) {
         Country country = countryRepo.findById(id)
@@ -38,17 +46,26 @@ public class CountryController {
         
         model.addAttribute("country", country);
         model.addAttribute("editType", "country");
+        // Можна передати values() enum-а, якщо ви хочете генерувати select динамічно, 
+        // але ваш HTML вже має хардкод опцій, тому це не обов'язково.
         return "edit_page";
     }
 
- // --- UPDATE ---
+    // --- UPDATE ---
     @PostMapping("/updateCountry")
     public String updateCountry(@RequestParam Long id, 
                                 @RequestParam String name,
-                                @RequestParam(defaultValue = "false") boolean isOpen) { 
+                                @RequestParam(defaultValue = "false") boolean isOpen,
+                                @RequestParam String locationTypeStr) { // Отримуємо тип
+        
         Country country = countryRepo.findById(id).orElseThrow();
+        
         country.setName(name);
-        country.setOpen(isOpen); // Оновлюємо статус
+        country.setOpen(isOpen);
+        
+        // Оновлюємо тип місцевості
+        country.setLocationType(LocationType.valueOf(locationTypeStr));
+        
         countryRepo.save(country);
         return "redirect:/dashboard";
     }

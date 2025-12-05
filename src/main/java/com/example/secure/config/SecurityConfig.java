@@ -50,7 +50,7 @@ public class SecurityConfig {
         return authConfig.getAuthenticationManager();
     }
 
-    // === ГОЛОВНА ЗМІНА: Використовуємо BCrypt ===
+    // === Використовуємо BCrypt ===
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder(10);

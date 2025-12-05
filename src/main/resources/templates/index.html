@@ -77,6 +77,12 @@
             <h2>Країни</h2>
             <form th:action="@{/addCountry}" method="post">
                 <input type="text" name="countryName" placeholder="Назва нової країни" required>
+                <select name="locationTypeStr" required>
+                    <option value="" disabled selected>Тип місцевості</option>
+                    <option value="MOUNTAINS">⛰️ Гори</option>
+                    <option value="SEASIDE">🌊 Море / Водойма</option>
+                    <option value="NEUTRAL">🏙️ Рівнина (Без гір/моря)</option>
+                </select>
                 <button type="submit">Додати Країну</button>
             </form>
             
@@ -84,6 +90,13 @@
                 <li th:each="country : ${countries}">
                     <div>
                         <span th:text="${country.name}">Назва країни</span>
+                        
+                        <br>
+                        <small style="color: #555;">
+                            <span th:if="${country.locationType.name() == 'MOUNTAINS'}">⛰️ Гори</span>
+                            <span th:if="${country.locationType.name() == 'SEASIDE'}">🌊 Море</span>
+                            <span th:if="${country.locationType.name() == 'NEUTRAL'}">🏙️ Рівнина</span>
+                        </small>
                         <span th:unless="${country.isOpen}" style="color: red; font-weight: bold; font-size: 0.8em;">(ЗАЧИНЕНО)</span>
                     </div>
                     
@@ -98,13 +111,49 @@
         <div class="column">
             <h2>Курорти</h2>
             <form th:action="@{/addResort}" method="post">
-                <input type="text" name="resortName" placeholder="Назва нового курорту" required>
+                
+                <input type="text" name="resortName" placeholder="Назва нового курорту" required
+                       th:value="${resortForm.name}">
+                
                 <select name="countryId" required>
-                    <option value="" disabled selected>Оберіть країну</option>
-                    <option th:each="country : ${countries}"
-                            th:value="${country.id}"
-                            th:text="${country.name}">Країна</option>
+                    <option value="" disabled th:selected="${resortForm.country == null}">Оберіть країну</option>
+                    <option th:each="country : ${countries}" 
+                            th:value="${country.id}" 
+                            th:text="${country.name}"
+                            th:selected="${resortForm.country != null and resortForm.country.id == country.id}">
+                    </option>
                 </select>
+
+                <select name="seasonStr" required>
+                    <option value="" disabled th:selected="${resortForm.season == null}">Тип сезону</option>
+                    <option value="SUMMER" th:selected="${resortForm.season != null and resortForm.season.name() == 'SUMMER'}">Літній</option>
+                    <option value="WINTER" th:selected="${resortForm.season != null and resortForm.season.name() == 'WINTER'}">Зимовий</option>
+                    <option value="ALL_SEASON" th:selected="${resortForm.season != null and resortForm.season.name() == 'ALL_SEASON'}">Універсальний</option>
+                </select>
+                
+                <div style="font-size: 0.9em; margin: 10px 0;">
+                    <label>
+                        <input type="checkbox" name="hasSki" th:checked="${resortForm.hasSki}"> 
+                        Лижі/Сноуборд ⛷️
+                    </label>
+                    <label>
+                        <input type="checkbox" name="hasBeach" th:checked="${resortForm.hasBeach}"> 
+                        Море/Пляж 🏖️
+                    </label>
+                    <label>
+                        <input type="checkbox" name="hasExcursions" th:checked="${resortForm.hasExcursions}"> 
+                        Екскурсії 🏛️
+                    </label>
+                    <label>
+                        <input type="checkbox" name="hasSanatorium" th:checked="${resortForm.hasSanatorium}"> 
+                        Санаторій 🧖‍♀️
+                    </label>
+                    <label>
+                        <input type="checkbox" name="hasEntertainment" th:checked="${resortForm.hasEntertainment}"> 
+                        Розваги 🎉
+                    </label>
+                </div>
+
                 <button type="submit">Додати Курорт</button>
             </form>
             

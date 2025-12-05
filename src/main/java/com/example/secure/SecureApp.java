@@ -2,7 +2,9 @@ package com.example.secure;
 
 import com.example.secure.model.Country;
 import com.example.secure.model.Hotel;
+import com.example.secure.model.LocationType;
 import com.example.secure.model.Resort;
+import com.example.secure.model.ResortSeason;
 import com.example.secure.model.User;
 import com.example.secure.repo.CountryRepo;
 import com.example.secure.repo.HotelRepo;
@@ -57,9 +59,12 @@ public class SecureApp {
                 log.info("[INIT] База даних порожня. Починаємо заповнення...");
 
                 // --- Створюємо Країни ---
-                Country ukraine = new Country("Україна");
-                Country turkey = new Country("Туреччина");
-                Country egypt = new Country("Єгипет");
+             // Україна = Гори (дозволяє Зимові та Універсальні курорти)
+                Country ukraine = new Country("Україна", LocationType.MOUNTAINS);
+             // Туреччина = Море (дозволяє Літні та Універсальні курорти)
+                Country turkey = new Country("Туреччина", LocationType.SEASIDE);
+             // Єгипет = Море
+                Country egypt = new Country("Єгипет", LocationType.SEASIDE);
                 
                 countryRepo.save(ukraine);
                 countryRepo.save(turkey);
@@ -67,9 +72,18 @@ public class SecureApp {
                 log.info("[INIT] Країни додано.");
 
                 // --- Створюємо Курорти ---
-                Resort bukovel = new Resort("Буковель", ukraine);
-                Resort antalya = new Resort("Анталія", turkey);
-                Resort sharm = new Resort("Шарм-ель-Шейх", egypt);
+                // Буковель - ЗИМОВИЙ (має мати лижі)
+                Resort bukovel = new Resort("Буковель", ukraine, ResortSeason.WINTER);
+                bukovel.setHasSki(true);
+                bukovel.setHasSanatorium(true);
+                // Анталія - ЛІТНІЙ (має мати море)
+                Resort antalya = new Resort("Анталія", turkey, ResortSeason.SUMMER);
+                antalya.setHasBeach(true); 
+                antalya.setHasEntertainment(true);
+                // Шарм-ель-Шейх - ЛІТНІЙ (має мати море)
+                Resort sharm = new Resort("Шарм-ель-Шейх", egypt, ResortSeason.SUMMER);
+                sharm.setHasSanatorium(true);
+                sharm.setHasBeach(true); 
                 
                 resortRepo.save(bukovel);
                 resortRepo.save(antalya);

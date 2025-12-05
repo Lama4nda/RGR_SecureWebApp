@@ -1,6 +1,7 @@
 package com.example.secure.controller; 
 
-import com.example.secure.model.Hotel; // Не забудьте імпортувати модель Hotel
+import com.example.secure.model.Hotel;
+import com.example.secure.model.Resort;
 import com.example.secure.repo.CountryRepo;
 import com.example.secure.repo.HotelRepo;
 import com.example.secure.repo.ResortRepo;
@@ -66,6 +67,12 @@ public class WebController {
 
         // Передаємо цю мапу на сторінку
         model.addAttribute("freeRoomsMap", freeRoomsMap);
+        
+        // --- НОВЕ: ПІДГОТОВКА ФОРМИ ADD RESORT ---
+        // Якщо RedirectAttributes не передали "resortForm" (значить, це перший захід на сторінку)
+        if (!model.containsAttribute("resortForm")) {
+            model.addAttribute("resortForm", new Resort()); // Передаємо пустий об'єкт
+        }
 
         return "index"; 
     }
